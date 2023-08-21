@@ -5,12 +5,17 @@ import {
   HttpCode,
   HttpException,
   HttpStatus,
+  Param,
   Post,
+  Query,
 } from '@nestjs/common';
 
 import { AppService } from './app.service';
 import { User } from '../entities/user.entity';
 import { CreateUserDto } from '../dtos/user.dto';
+import { CreateTweetDto } from '../dtos/tweet.dto';
+import { Tweet } from '../entities/tweet.entity';
+//import { Tweet } from '../entities/tweet.entity';
 
 @Controller()
 export class AppController {
@@ -37,77 +42,47 @@ export class AppController {
   }
 
   @Post('tweets')
+  @HttpCode(201)
+  createTweet(@Body() body: CreateTweetDto) {
+    try {
+      return this.appService.createTweet(body);
+    } catch (err) {
+      if (err.response === 'UNAUTHORIZED') {
+        throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED);
+      }
+      throw new HttpException('ERROR', HttpStatus.BAD_REQUEST);
+    }
+  }
 
+  @Get('tweets')
+  getTweet(@Query() page): Tweet[] {
+    try {
+      return this.appService.getTweets(page);
+    } catch (err) {
+      if (err.response === 'Informe uma página válida!') {
+        throw new HttpException(
+          'Informe uma página válida!',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+      throw new HttpException('ERROR', HttpStatus.BAD_REQUEST);
+    }
+  }
 
-  
+  @Get('tweets/:username')
+  getUserTweets(@Param('username') username: string) {
+    return this.appService.getUserTweets(username);
+  }
+
   /*
-    {
-
-  }
-
-   @Get('tweets') {
-
-  }
 
   @Get('tweets/:username') {
 
   }*/
 }
+// /  getTweet(@Query() page): Tweet[] {
 
 /*
-const tweets = []   // { username: "bobesponja", tweet: "Oi tudo bom?" }
-
-// Funções (endpoints)
-app.post("/sign-up", (req, res) => {
-    const { username, avatar } = req.body
-
-    if (!username || typeof username !== "string" || !avatar || typeof avatar !== "string") {
-        return res.status(400).send("Todos os campos são obrigatórios!")
-    }
-
-    users.push({ username, avatar })
-    res.status(201).send("OK")
-})
-
-app.post("/tweets", (req, res) => {
-    const { tweet } = req.body
-    const { user } = req.headers
-
-    if (!user || typeof user !== "string" || !tweet || typeof tweet !== "string") {
-        return res.status(400).send("Todos os campos são obrigatórios!")
-    }
-
-    // find => retornar undefined se não achar OU o objeto do usuário se achar
-    const userExists = users.find((u) => u.username === user)
-
-    if (!userExists) return res.status(401).send("UNAUTHORIZED")
-
-    tweets.push({ username: user, tweet })
-    res.status(201).send("OK")
-})
-
-app.get("/tweets", (req, res) => {
-    const page = Number(req.query.page)
-
-    if (req.query.page && (isNaN(page) || page < 1)) {
-        return res.status(400).send("Informe uma página válida!")
-    }
-
-    const completeTweets = tweets.map((tweet) => {
-        const user = users.find((u) => u.username === tweet.username)
-        return { ...tweet, avatar: user.avatar }
-    })
-
-    if (page) {
-        const limit = 10
-        const start = (page - 1) * limit
-        const end = page * limit
-
-        return res.send(completeTweets.slice(start, end))
-    }
-
-    res.send(completeTweets.slice(-10))
-})
 
 app.get("/tweets/:username", (req, res) => {
     const { username } = req.params
