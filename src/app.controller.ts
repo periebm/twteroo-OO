@@ -1,5 +1,16 @@
-import { Controller, Get } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpException,
+  HttpStatus,
+  Post,
+} from '@nestjs/common';
+
 import { AppService } from './app.service';
+import { User } from '../entities/user.entity';
+import { CreateUserDto } from '../dtos/user.dto';
 
 @Controller()
 export class AppController {
@@ -7,13 +18,44 @@ export class AppController {
 
   @Get()
   getHello(): string {
-    return this.appService.getHello();
+    return "I'm okay!";
   }
+
+  @Get('users')
+  getUsers(): User[] {
+    return this.appService.getUsers();
+  }
+
+  @Post('sign-up')
+  @HttpCode(200)
+  createUser(@Body() body: CreateUserDto) {
+    try {
+      return this.appService.createUser(body);
+    } catch (err) {
+      throw new HttpException('ERROR', HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  @Post('tweets')
+
+
+  
+  /*
+    {
+
+  }
+
+   @Get('tweets') {
+
+  }
+
+  @Get('tweets/:username') {
+
+  }*/
 }
 
 /*
 const tweets = []   // { username: "bobesponja", tweet: "Oi tudo bom?" }
-const users = []    // { username: "bobesponja", avatar: "www.imagem.com" }
 
 // Funções (endpoints)
 app.post("/sign-up", (req, res) => {
